@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600&family=Prata&display=swap');
+
+:root {
+  font-family: 'Manrope', sans-serif;
+  color: #f7f1df;
+  background: #f2ead6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --forest: #263a2b;
+  --cream: #f2ead6;
+  --honey: #d7a62b;
+  --ink: #233027;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; background: var(--cream); }
+a { color: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+
+.hero {
+  position: relative;
+  min-height: 760px;
+  overflow: hidden;
+  padding: 0 clamp(24px, 6vw, 96px);
+  background:
+    radial-gradient(circle at 78% 48%, rgba(216, 166, 42, .24), transparent 24%),
+    linear-gradient(115deg, rgba(20, 38, 25, .98), rgba(41, 61, 43, .9)),
+    var(--forest);
+}
+
+.hero::before,
+.hero::after {
+  content: '';
+  position: absolute;
+  border: 1px solid rgba(247, 241, 223, .12);
+  transform: rotate(30deg);
+}
+.hero::before { width: 360px; height: 415px; right: 4vw; top: 120px; }
+.hero::after { width: 220px; height: 255px; right: 13vw; top: 200px; }
+
+.nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 30px 0;
+  border-bottom: 1px solid rgba(247, 241, 223, .18);
+}
+
+.brand { display: flex; gap: 12px; align-items: center; text-decoration: none; font-size: 14px; letter-spacing: .04em; }
+.brand strong { display: block; font-family: 'Prata', serif; font-size: 20px; font-weight: 400; }
+.brand__mark { width: 42px; color: var(--honey); }
+.brand__mark svg { display: block; width: 100%; }
+.nav__link { font-size: 13px; text-underline-offset: 6px; text-decoration-color: rgba(247,241,223,.4); }
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: clamp(110px, 15vh, 170px) 0 100px;
+}
+
+.eyebrow { margin: 0 0 24px; color: #e1ba56; font-size: 12px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; }
+h1, h2 { margin: 0; font-family: 'Prata', serif; font-weight: 400; letter-spacing: -.035em; }
+h1 { max-width: 900px; font-size: clamp(58px, 9vw, 128px); line-height: .96; }
+.hero__lead { max-width: 570px; margin: 38px 0; color: rgba(247, 241, 223, .75); font-size: clamp(16px, 2vw, 19px); line-height: 1.75; }
+.button { display: inline-block; padding: 16px 24px; border-radius: 999px; background: var(--honey); color: #1c291f; font-size: 13px; font-weight: 600; text-decoration: none; transition: transform .2s, background .2s; }
+.button:hover { transform: translateY(-2px); background: #e6b83d; }
+
+.hero__seal {
+  position: absolute;
+  z-index: 1;
+  right: clamp(30px, 10vw, 160px);
+  bottom: 70px;
+  display: grid;
+  width: 126px;
+  aspect-ratio: 1;
+  place-content: center;
+  border: 1px solid rgba(247,241,223,.35);
+  border-radius: 50%;
+  text-align: center;
+  transform: rotate(8deg);
+}
+.hero__seal span { font-family: 'Prata', serif; font-size: 27px; }
+.hero__seal small { color: rgba(247,241,223,.65); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+
+.about { display: grid; grid-template-columns: .9fr 1.4fr; gap: clamp(50px, 8vw, 140px); max-width: 1320px; margin: 0 auto; padding: 130px clamp(24px, 6vw, 96px); color: var(--ink); }
+.about h2 { font-size: clamp(42px, 5vw, 72px); line-height: 1.12; }
+.values { display: grid; gap: 0; }
+.value { display: grid; grid-template-columns: 48px 160px 1fr; gap: 20px; padding: 30px 0; border-top: 1px solid rgba(35,48,39,.2); }
+.value > span { color: #ad8524; font-size: 12px; }
+.value h3 { margin: 0; font-family: 'Prata', serif; font-size: 22px; font-weight: 400; }
+.value p { margin: 0; color: #667168; font-size: 14px; line-height: 1.7; }
+
+footer { display: flex; justify-content: space-between; padding: 28px clamp(24px, 6vw, 96px); background: #1d2b21; color: rgba(247,241,223,.6); font-size: 12px; }
+
+@media (max-width: 760px) {
+  .hero { min-height: 700px; }
+  .hero__seal { right: 24px; bottom: 32px; width: 100px; }
+  .about { grid-template-columns: 1fr; padding-top: 90px; padding-bottom: 90px; }
+  .value { grid-template-columns: 36px 1fr; }
+  .value p { grid-column: 2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .button { transition: none; }
+}
