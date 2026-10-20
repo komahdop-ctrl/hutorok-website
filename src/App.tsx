@@ -1,144 +1,273 @@
-const products = [
-  { name: 'Разнотравье', note: 'Мягкий, цветочный', tone: 'gold', description: 'Летние травы и луговые цветы. Универсальный мёд на каждый день.' },
-  { name: 'Подсолнечный', note: 'Нежный, сливочный', tone: 'sun', description: 'Светлый мёд с деликатным вкусом и быстрой естественной кристаллизацией.' },
-  { name: 'Гречишный', note: 'Терпкий, насыщенный', tone: 'amber', description: 'Выразительный аромат, глубокий цвет и долгое тёплое послевкусие.' },
-]
+import { useState } from 'react'
 
-const values = [
-  ['Своя пасека', 'Знаем каждую семью и отвечаем за путь мёда от улья до банки.'],
-  ['Без нагрева', 'Бережно сохраняем природный аромат, вкус и естественную текстуру.'],
-  ['Честный состав', 'Внутри только мёд. Без добавок, сиропов и ароматизаторов.'],
-]
-
-function HoneyMark() {
-  return (
-    <svg aria-hidden="true" viewBox="0 0 64 64">
-      <path d="M32 5 54 18v28L32 59 10 46V18L32 5Z" fill="currentColor" />
-      <path d="M22 31c4-9 16-9 20 0-1 11-19 11-20 0Z" fill="#f7e8b3" />
-      <path d="M25 29h14M24 34h16M27 39h10" stroke="currentColor" strokeWidth="3" />
-      <path d="M25 25c-7 2-9-7-3-9 5-1 8 5 3 9Zm14 0c7 2 9-7 3-9-5-1-8 5-3 9Z" fill="#fffaf0" opacity=".85" />
-    </svg>
-  )
+type Pack = { size: string; price: number }
+type Honey = {
+  id: string
+  name: string
+  subtitle: string
+  harvest: '2025' | '2026' | 'уточняется'
+  description: string
+  packs: Pack[]
+  color: string
+  flower: string
+  scarce?: boolean
 }
 
-function Jar({ tone }: { tone: string }) {
-  return (
-    <div className={`jar jar--${tone}`} aria-hidden="true">
-      <div className="jar__lid" />
-      <div className="jar__glass">
-        <span className="jar__label">Хуторок<small>мёд</small></span>
-      </div>
+const phones = [
+  { label: '+7 917 954-46-95', digits: '+79179544695' },
+  { label: '+7 937 208-23-30', digits: '+79372082330' },
+]
+
+// Указываем только подтверждённые фасовки и цены. Нельзя выводить цену
+// за 1/3 л арифметическим делением стоимости десятилитрового ведра.
+const honey: Honey[] = [
+  { id: 'early-2026', name: 'Цветочно-липовый', subtitle: 'Первый медосбор', harvest: '2026',
+    description: 'Ранний летний мёд с цветочным ароматом и липовой нотой. Осталось немного.',
+    packs: [{ size: '1 л', price: 1200 }, { size: '3 л', price: 3000 }, { size: '10 л', price: 9000 }],
+    color: 'gold', flower: 'Липа и цветы', scarce: true },
+  { id: 'meadow-2026', name: 'Летнее разнотравье', subtitle: 'Цветочный с подсолнечником', harvest: '2026',
+    description: 'Летний медосбор: цветочное разнотравье с участием подсолнечника. Мягкий, солнечный вкус.',
+    packs: [{ size: '10 л', price: 3000 }], color: 'sun', flower: 'Луговые цветы' },
+  { id: 'sunflower-2026', name: 'Поздний летний', subtitle: 'Разнотравье с подсолнечником', harvest: '2026',
+    description: 'Мёд позднего медосбора с преобладанием подсолнечника. Быстро и естественно кристаллизуется.',
+    packs: [{ size: '10 л', price: 4000 }], color: 'amber', flower: 'Подсолнечник' },
+  { id: 'buckwheat-2026', name: 'Гречишный', subtitle: 'Выразительный характер', harvest: '2026',
+    description: 'Яркий аромат, насыщенный оттенок и характерное послевкусие.',
+    packs: [{ size: '10 л', price: 5000 }], color: 'chestnut', flower: 'Гречиха' },
+  { id: 'clover', name: 'Донниковый', subtitle: 'Нежный аромат', harvest: 'уточняется',
+    description: 'Мягкий, приятный мёд с тонкими травяными нотами. Год урожая уточните при заказе.',
+    packs: [{ size: '1 л', price: 1200 }, { size: '3 л', price: 3000 }, { size: '10 л', price: 9000 }],
+    color: 'cream', flower: 'Донник' },
+  { id: 'linden-2025', name: 'Липовый', subtitle: 'Ограниченный остаток', harvest: '2025',
+    description: 'Мёд прошлогоднего урожая. Небольшое количество в наличии — уточняйте.',
+    packs: [{ size: '1 л', price: 1000 }], color: 'linden', flower: 'Липа', scarce: true },
+  { id: 'maple-2025', name: 'Черноклёновый', subtitle: 'Ограниченный остаток', harvest: '2025',
+    description: 'Ароматный мёд прошлогоднего урожая, в небольшом количестве.',
+    packs: [{ size: '1 л', price: 1000 }], color: 'maple', flower: 'Черноклён', scarce: true },
+  { id: 'sunflower-2025', name: 'Подсолнечный', subtitle: 'Урожай прошлого года', harvest: '2025',
+    description: 'Мёд из подсолнечника, урожай 2025 года.',
+    packs: [{ size: '10 л', price: 2500 }], color: 'sun', flower: 'Подсолнечник' },
+  { id: 'flowers-2025', name: 'Цветочный', subtitle: 'С цветочным разнотравьем', harvest: '2025',
+    description: 'Мёд прошлого сезона с цветочными нотами.',
+    packs: [{ size: '10 л', price: 3000 }], color: 'gold', flower: 'Летние цветы' },
+]
+
+const photos = {
+  meadow: 'https://images.unsplash.com/photo-1760040466917-9d10a916fb87?auto=format&fit=crop&w=1600&q=80',
+  bees: 'https://images.unsplash.com/photo-1759355858724-5cbba3adf6da?auto=format&fit=crop&w=1100&q=78',
+  honey: 'https://images.unsplash.com/photo-1646562292888-6b5167510ab7?auto=format&fit=crop&w=1100&q=80',
+}
+
+function Flower({ className = '' }: { className?: string }) {
+  return <svg className={className} aria-hidden="true" viewBox="0 0 100 100" fill="none">
+    <g fill="#fffdf2"><ellipse cx="50" cy="28" rx="12" ry="23"/><ellipse cx="50" cy="72" rx="12" ry="23"/><ellipse cx="28" cy="50" rx="23" ry="12"/><ellipse cx="72" cy="50" rx="23" ry="12"/><ellipse cx="34.5" cy="34.5" rx="12" ry="21" transform="rotate(-45 34.5 34.5)"/><ellipse cx="65.5" cy="65.5" rx="12" ry="21" transform="rotate(-45 65.5 65.5)"/><ellipse cx="65.5" cy="34.5" rx="12" ry="21" transform="rotate(45 65.5 34.5)"/><ellipse cx="34.5" cy="65.5" rx="12" ry="21" transform="rotate(45 34.5 65.5)"/></g>
+    <circle cx="50" cy="50" r="15" fill="#f4b523"/><circle cx="45" cy="46" r="2" fill="#cf8520"/><circle cx="53" cy="54" r="2" fill="#cf8520"/>
+  </svg>
+}
+
+function Bee({ className = '' }: { className?: string }) {
+  return <svg className={className} aria-hidden="true" viewBox="0 0 104 82" fill="none">
+    <ellipse cx="51" cy="22" rx="19" ry="14" fill="#fff" fillOpacity=".85" transform="rotate(-24 51 22)"/>
+    <ellipse cx="75" cy="20" rx="19" ry="14" fill="#fff" fillOpacity=".8" transform="rotate(27 75 20)"/>
+    <ellipse cx="53" cy="50" rx="31" ry="21" fill="#f9b722" transform="rotate(-12 53 50)"/>
+    <path d="M45 30c-5 11-4 26 3 38M61 30c-5 11-4 26 2 36" stroke="#362c1c" strokeWidth="9"/>
+    <circle cx="22" cy="48" r="15" fill="#362c1c"/><circle cx="17" cy="44" r="3" fill="#fff"/>
+    <path d="M8 39 2 31M28 35l1-9" stroke="#362c1c" strokeWidth="2.5" strokeLinecap="round"/>
+    <path d="m84 47 15-6-12 16" fill="#362c1c"/>
+  </svg>
+}
+
+function HoneyMark() {
+  return <span className="brand__mark" aria-hidden="true"><Bee /></span>
+}
+
+function Jar({ color }: { color: string }) {
+  return <div className={'jar jar--' + color} aria-hidden="true">
+    <div className="jar__lid" />
+    <div className="jar__glass">
+      <span className="jar__shine" />
+      <span className="jar__label"><span className="jar__label-flower">✿</span><strong>Хуторок</strong><small>НАТУРАЛЬНЫЙ МЁД</small></span>
     </div>
-  )
+  </div>
+}
+
+function price(value: number) {
+  return new Intl.NumberFormat('ru-RU').format(value) + ' ₽'
+}
+
+function smsLink(item: Honey, pack: Pack) {
+  const text = 'Здравствуйте! Хочу заказать мёд с пасеки «Хуторок»: ' +
+    item.name + ', урожай ' + item.harvest + ', ' + pack.size +
+    ', цена ' + price(pack.price) + '. Подскажите наличие и доставку.'
+  return 'sms:' + phones[0].digits + '?body=' + encodeURIComponent(text)
 }
 
 export default function App() {
-  return (
-    <main id="top">
-      <section className="hero">
-        <nav className="nav" aria-label="Основная навигация">
-          <a className="brand" href="#top" aria-label="Пасека Хуторок — на главную">
-            <span className="brand__mark"><HoneyMark /></span>
-            <span>Пасека <strong>Хуторок</strong></span>
-          </a>
-          <div className="nav__links">
-            <a href="#catalog">Мёд</a>
-            <a href="#about">О пасеке</a>
-            <a href="#order">Заказать</a>
-          </div>
-        </nav>
+  const [year, setYear] = useState<'all' | '2026' | '2025'>('all')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const visible = honey.filter(item => year === 'all' || item.harvest === year)
+  const closeMenu = () => setMenuOpen(false)
 
-        <div className="hero__content">
-          <p className="eyebrow">Семейная пасека · натуральный продукт</p>
-          <h1>Мёд, в котором<br />слышно лето</h1>
-          <p className="hero__lead">
-            Бережно собираем настоящий мёд и сохраняем в каждой банке аромат трав,
-            солнце и тишину родных полей.
-          </p>
-          <div className="hero__actions">
-            <a className="button" href="#catalog">Выбрать мёд</a>
-            <a className="text-link" href="#about">Узнать о пасеке <span>↘</span></a>
+  return <div id="top">
+    <a className="skip-link" href="#catalog">Перейти к каталогу</a>
+    <header className="site-header">
+      <div className="header-inner wrap">
+        <a className="brand" href="#top" onClick={closeMenu} aria-label="Пасека Хуторок — на главную">
+          <HoneyMark /><span className="brand__text"><span>СЕМЕЙНАЯ ПАСЕКА</span><strong>Хуторок</strong></span>
+        </a>
+        <button className="menu-toggle" type="button" aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'} aria-expanded={menuOpen} aria-controls="main-nav" onClick={() => setMenuOpen(!menuOpen)}>
+          <span /><span /><span />
+        </button>
+        <nav id="main-nav" className={'nav-links' + (menuOpen ? ' nav-links--open' : '')} aria-label="Основное меню">
+          <a onClick={closeMenu} href="#catalog">Наш мёд</a>
+          <a onClick={closeMenu} href="#about">О пасеке</a>
+          <a onClick={closeMenu} href="#process">От цветка до банки</a>
+          <a onClick={closeMenu} href="#gallery">Галерея</a>
+          <a onClick={closeMenu} className="nav-order" href="#order">Как заказать <span>↗</span></a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section className="hero" aria-labelledby="hero-title">
+        <img className="hero__meadow" src={photos.meadow} alt="" fetchPriority="high" />
+        <div className="hero__veil" />
+        <div className="hero__sun" aria-hidden="true" />
+        <div className="hero__inner wrap">
+          <div className="hero__copy">
+            <p className="eyebrow eyebrow--green"><span className="eyebrow__dot" /> Натуральный мёд из Самарской области</p>
+            <h1 id="hero-title">В каждой банке — <em>целое лето!</em></h1>
+            <p className="hero__lead">Аромат цветущих лугов, тепло солнца и труд тысяч пчёл. Настоящий мёд с нашей семейной пасеки — прямо к вашему столу.</p>
+            <div className="hero__actions">
+              <a className="button button--primary" href="#catalog">Выбрать мёд <span>↗</span></a>
+              <a className="button button--outline" href="#about">Наша история</a>
+            </div>
+            <div className="hero__proof"><span>✻ Своё производство</span><span>✻ Натуральный состав</span><span>✻ Семейное дело</span></div>
+          </div>
+          <div className="hero__visual">
+            <div className="hero__picture">
+              <img src={photos.honey} alt="Иллюстративная фотография банки мёда с цветами" />
+              <span className="hero__picture-label">Сладость, подаренная природой</span>
+            </div>
+            <div className="hero__stamp">С любовью<br />от пасеки<br /><strong>Хуторок</strong></div>
+            <Flower className="hero__flower hero__flower--one" />
+            <Flower className="hero__flower hero__flower--two" />
+            <Bee className="hero__bee" />
           </div>
         </div>
+        <div className="hero__bottom" aria-hidden="true"><span>Самарская область · село Русская Селитьба</span><span>Лето в каждом вкусе ✳</span></div>
+      </section>
 
-        <div className="hero__seal" aria-hidden="true">
-          <span>100%</span><small>натурально</small>
+      <section className="intro-strip" aria-label="Преимущества">
+        <div className="wrap intro-strip__grid">
+          <div><span className="strip-icon">✿</span><span><strong>Настоящий мёд</strong><small>Без добавок к собранному мёду</small></span></div>
+          <div><span className="strip-icon">☀</span><span><strong>Собственный медосбор</strong><small>Самарские луга и поля</small></span></div>
+          <div><span className="strip-icon">♡</span><span><strong>От нашей семьи</strong><small>Без посредников</small></span></div>
         </div>
       </section>
 
-      <section className="catalog section" id="catalog">
-        <header className="section__heading">
-          <div>
-            <p className="eyebrow">Из нашей коллекции</p>
-            <h2>Мёд нового<br />урожая</h2>
+      <section className="section catalog" id="catalog">
+        <div className="wrap">
+          <div className="section-title">
+            <div><p className="eyebrow">Наше солнечное богатство</p><h2>Выберите <em>свой мёд</em></h2></div>
+            <p>Каждый медосбор — свой аромат и характер. Мы честно указываем год урожая и цены на доступную фасовку.</p>
           </div>
-          <p>Три характера одного лета. Фасовку и стоимость добавим после утверждения ассортимента.</p>
-        </header>
-        <div className="products">
-          {products.map((product) => (
-            <article className="product" key={product.name}>
-              <div className="product__visual"><Jar tone={product.tone} /></div>
-              <div className="product__top">
-                <span>{product.note}</span><span>урожай 2026</span>
+          <div className="catalog-toolbar">
+            <div className="year-tabs" role="group" aria-label="Фильтр по году урожая">
+              <button type="button" className={year === 'all' ? 'active' : ''} aria-pressed={year === 'all'} onClick={() => setYear('all')}>Весь мёд</button>
+              <button type="button" className={year === '2026' ? 'active' : ''} aria-pressed={year === '2026'} onClick={() => setYear('2026')}>Урожай 2026</button>
+              <button type="button" className={year === '2025' ? 'active' : ''} aria-pressed={year === '2025'} onClick={() => setYear('2025')}>Урожай 2025</button>
+            </div>
+            <span className="catalog-count">{visible.length} видов</span>
+          </div>
+          <div className="products">
+            {visible.map((item) => <article className="product" key={item.id}>
+              <div className={'product__visual product__visual--' + item.color}>
+                <span className="product__badge">{item.harvest === 'уточняется' ? 'Год уточняется' : 'Урожай ' + item.harvest}</span>
+                <span className="product__flower">✻</span>
+                <Jar color={item.color} />
+                {item.scarce && <span className="product__scarce">Мало в наличии</span>}
               </div>
-              <h3>{product.name}</h3>
-              <p>{product.description}</p>
-              <span className="product__price">Цена уточняется</span>
-            </article>
-          ))}
+              <div className="product__body">
+                <p className="product__eyebrow">{item.flower} · {item.subtitle}</p>
+                <h3>{item.name}</h3>
+                <p className="product__description">{item.description}</p>
+                <div className="product__packs" aria-label={'Цены на ' + item.name}>
+                  {item.packs.map(pack => <a key={pack.size} className="pack" href={smsLink(item, pack)} aria-label={'Заказать ' + item.name + ', ' + pack.size + ', ' + price(pack.price) + ' по SMS'}>
+                    <span>{pack.size}</span><strong>{price(pack.price)}</strong><span aria-hidden="true">↗</span>
+                  </a>)}
+                </div>
+                <p className="product__hint">Нажмите на цену, чтобы подготовить заказ по SMS</p>
+              </div>
+            </article>)}
+          </div>
+          <p className="catalog-notice">Цены указаны по состоянию на октябрь 2026 г. Наличие и стоимость доставки уточняем при заказе. Объём тары указан в литрах; фактический вес зависит от плотности мёда.</p>
         </div>
       </section>
 
       <section className="story" id="about">
-        <div className="story__picture" aria-label="Место для будущей фотографии пасеки">
-          <span>Будущая фотография пасеки</span>
-        </div>
-        <div className="story__content">
-          <p className="eyebrow">О пасеке</p>
-          <h2>Небольшое дело<br />с большим смыслом</h2>
-          <p className="story__lead">
-            «Хуторок» — семейная пасека, где всё держится на уважении к пчёлам,
-            земле и естественному ходу вещей.
-          </p>
-          <p>
-            Здесь появится настоящая история вашей семьи: с чего всё началось,
-            где стоят ульи и почему ваш мёд особенный. Пока мы оставили тёплый,
-            честный текст, который легко заменить.
-          </p>
-          <div className="story__fact"><strong>От улья</strong><span>до вашей семьи — бережно и без посредников</span></div>
+        <div className="wrap story__grid">
+          <div className="story__image">
+            <img src={photos.bees} loading="lazy" alt="Пчёлы собирают нектар на цветущих растениях — тематическая фотография" />
+            <div className="story__image-caption">Наше вдохновение — сама природа</div>
+            <Flower className="story__flower"/>
+          </div>
+          <div className="story__text">
+            <p className="eyebrow">Знакомьтесь, это мы</p>
+            <h2>Семейная пасека <em>с душой</em></h2>
+            <p className="story__large">Наш «Хуторок» находится в Самарской области, в селе Русская Селитьба. Здесь мы работаем с пчёлами и собираем мёд, который любим сами.</p>
+            <p>Медосбор меняется от сезона к сезону: цветёт липа, приходит время разнотравья, а ближе к концу лета на полях раскрывается подсолнечник. В этом и ценность настоящего мёда — он не обязан быть одинаковым.</p>
+            <div className="story__note"><span>♥</span><p>Мы продаём мёд со своей пасеки и открыто рассказываем о медосборах, урожаях и фасовке.</p></div>
+            <a className="text-link" href="#order">Познакомиться и заказать <span>↗</span></a>
+          </div>
         </div>
       </section>
 
-      <section className="values section">
-        <header className="section__heading section__heading--compact">
-          <div><p className="eyebrow">Почему нам доверяют</p><h2>Всё настоящее</h2></div>
-        </header>
-        <div className="values__grid">
-          {values.map(([title, text], index) => (
-            <article className="value" key={title}>
-              <span>0{index + 1}</span><h3>{title}</h3><p>{text}</p>
-            </article>
-          ))}
+      <section className="section process" id="process">
+        <div className="wrap">
+          <div className="section-title section-title--center"><div><p className="eyebrow">Как рождается мёд</p><h2>Путь <em>от цветка до банки</em></h2></div></div>
+          <div className="process__grid">
+            <div className="process__step"><span className="process__number">01</span><span className="process__icon">✿</span><h3>Цветут луга</h3><p>Липа, донник, полевые цветы и подсолнечник дарят пчёлам нектар.</p></div>
+            <div className="process__step"><span className="process__number">02</span><span className="process__icon">♧</span><h3>Трудятся пчёлы</h3><p>Пчелиные семьи собирают нектар и превращают его в зрелый мёд.</p></div>
+            <div className="process__step"><span className="process__number">03</span><span className="process__icon">⬡</span><h3>Собираем урожай</h3><p>Отбираем запечатанные медовые рамки и откачиваем мёд.</p></div>
+            <div className="process__step"><span className="process__number">04</span><span className="process__icon">♡</span><h3>Делимся с вами</h3><p>Фасуем мёд в выбранную тару и согласовываем получение заказа.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="gallery section" id="gallery">
+        <div className="wrap">
+          <div className="section-title"><div><p className="eyebrow">Вдохновлено природой</p><h2>Красота <em>медового лета</em></h2></div><p>Пока здесь тематические фотографии природы и мёда. Настоящие снимки нашей пасеки будут добавлены отдельно и подписаны как архив «Хуторка».</p></div>
+          <div className="gallery__grid">
+            <figure className="gallery__tile gallery__tile--large"><img src={photos.meadow} alt="Летние луговые цветы на солнце" loading="lazy" /><figcaption>Луга в солнечном свете</figcaption></figure>
+            <figure className="gallery__tile"><img src={photos.bees} alt="Пчёлы на жёлтых цветах" loading="lazy" /><figcaption>Пчёлы и цветы</figcaption></figure>
+            <figure className="gallery__tile"><img src={photos.honey} alt="Баночка мёда рядом с цветами" loading="lazy" /><figcaption>Золотистый мёд</figcaption></figure>
+          </div>
+          <p className="gallery__credit">Иллюстративные фотографии: Jonathan Rathgeb, German Krupenin, Clare Neilson / <a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer">Unsplash</a>. На фото не изображена пасека «Хуторок».</p>
         </div>
       </section>
 
       <section className="order" id="order">
-        <p className="eyebrow">Простой заказ</p>
-        <h2>Мёд с пасеки<br />прямо к вашему столу</h2>
-        <div className="steps">
-          <div><span>01</span><strong>Выберите</strong><p>Подберём сорт и нужную фасовку.</p></div>
-          <div><span>02</span><strong>Напишите</strong><p>Добавим телефон и мессенджеры.</p></div>
-          <div><span>03</span><strong>Получите</strong><p>Согласуем удобную доставку или самовывоз.</p></div>
+        <div className="wrap order__grid">
+          <div>
+            <p className="eyebrow">Давайте знакомиться</p>
+            <h2>Пора добавить <em>немного лета</em> в ваш дом!</h2>
+            <p>Выберите мёд и фасовку в каталоге — откроется SMS с готовым текстом заказа. Или просто позвоните нам. Никакой регистрации, корзин и сложных форм.</p>
+            <a className="button button--primary" href="#catalog">Выбрать мёд <span>↗</span></a>
+          </div>
+          <div className="contact-card">
+            <span className="contact-card__flower">✺</span><h3>Свяжитесь с нами</h3>
+            <p>Подскажем, что сейчас есть в наличии, поможем с выбором и обсудим получение заказа.</p>
+            {phones.map(phone => <a className="contact-card__phone" href={'tel:' + phone.digits} key={phone.digits}>{phone.label}<span>↗</span></a>)}
+            <a className="contact-card__sms" href={'sms:' + phones[0].digits + '?body=' + encodeURIComponent('Здравствуйте! Хочу заказать натуральный мёд с пасеки «Хуторок». Подскажите, пожалуйста, ассортимент и доставку.')}>Написать SMS <span>↗</span></a>
+            <small>Самарская область, село Русская Селитьба. Доставку и самовывоз согласовываем индивидуально.</small>
+          </div>
         </div>
-        <a className="button button--light" href="mailto:hello@example.com">Контакты скоро появятся</a>
-        <small>Адрес и реальные способы связи добавим перед публикацией</small>
       </section>
-
-      <footer>
-        <a className="brand" href="#top"><span className="brand__mark"><HoneyMark /></span><span>Пасека <strong>Хуторок</strong></span></a>
-        <div><span>Натуральный мёд</span><span>Семейная пасека</span></div>
-        <p>Демонстрационная версия · 2026</p>
-      </footer>
     </main>
-  )
+    <footer className="footer">
+      <div className="wrap footer__grid"><div><a className="brand" href="#top"><HoneyMark /><span className="brand__text"><span>СЕМЕЙНАЯ ПАСЕКА</span><strong>Хуторок</strong></span></a><p>Мёд, в котором живёт лето.</p></div><div><strong>Разделы</strong><a href="#catalog">Наш мёд</a><a href="#about">О пасеке</a><a href="#gallery">Галерея</a></div><div><strong>Связаться</strong><a href="tel:+79179544695">+7 917 954-46-95</a><a href="tel:+79372082330">+7 937 208-23-30</a><a href="https://pchelovod63.ru/" target="_blank" rel="noopener noreferrer">Портал «Пчеловод 63» ↗</a></div></div>
+      <div className="footer__bottom wrap"><span>© 2026 Пасека «Хуторок». Самарская область.</span><a href="#top">Наверх ↑</a></div>
+    </footer>
+  </div>
 }
