@@ -1,0 +1,49 @@
+name: Browser QA
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build website
+        run: |
+          npm install
+          npm run build
+      - name: Install browser harness
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start preview
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 > /tmp/hutorok-preview.log 2>&1 &
+          for attempt in 1 2 3 4 5 6 7 8 9 10; do
+            curl -fsS http://127.0.0.1:4173/hutorok-website/ > /dev/null && exit 0
+            sleep 2
+          done
+          cat /tmp/hutorok-preview.log
+          exit 1
+      - name: Test desktop and mobile flows
+        run: node scripts/browser-qa.mjs
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hutorok-browser-screenshots
+          path: qa-output/
+          if-no-files-found: ignore
