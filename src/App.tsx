@@ -95,13 +95,6 @@ function price(value: number) {
   return new Intl.NumberFormat('ru-RU').format(value) + ' ₽'
 }
 
-function smsLink(item: Honey, pack: Pack) {
-  const text = 'Здравствуйте! Хочу заказать мёд с пасеки «Хуторок»: ' +
-    item.name + ', урожай ' + item.harvest + ', ' + pack.size +
-    ', цена ' + price(pack.price) + '. Подскажите наличие и доставку.'
-  return 'sms:' + phones[0].digits + '?body=' + encodeURIComponent(text)
-}
-
 export default function App() {
   const [year, setYear] = useState<'all' | '2026' | '2025'>('all')
   const [menuOpen, setMenuOpen] = useState(false)
@@ -123,10 +116,11 @@ export default function App() {
           <a onClick={closeMenu} href="#about">О пасеке</a>
           <a onClick={closeMenu} href="#process">От цветка до банки</a>
           <a onClick={closeMenu} href="#gallery">Галерея</a>
-          <a onClick={closeMenu} className="nav-order" href="#order">Как заказать <span>↗</span></a>
+          <a onClick={closeMenu} className="nav-order" href="#order">Контакты <span>↗</span></a>
         </nav>
       </div>
     </header>
+    <div className="beta-notice" role="note"><div className="wrap"><strong>Тестовая информационная версия.</strong> Каталог опубликован для ознакомления. Сайт не принимает заказы и оплату; сведения о продавце и порядке продажи уточняются.</div></div>
 
     <main>
       <section className="hero" aria-labelledby="hero-title">
@@ -139,7 +133,7 @@ export default function App() {
             <h1 id="hero-title">В каждой банке — <em>целое лето!</em></h1>
             <p className="hero__lead">Аромат цветущих лугов, тепло солнца и труд тысяч пчёл. Настоящий мёд с нашей семейной пасеки — прямо к вашему столу.</p>
             <div className="hero__actions">
-              <a className="button button--primary" href="#catalog">Выбрать мёд <span>↗</span></a>
+              <a className="button button--primary" href="#catalog">Посмотреть каталог <span>↗</span></a>
               <a className="button button--outline" href="#about">Наша история</a>
             </div>
             <div className="hero__proof"><span>✻ Своё производство</span><span>✻ Натуральный состав</span><span>✻ Семейное дело</span></div>
@@ -170,7 +164,7 @@ export default function App() {
         <div className="wrap">
           <div className="section-title">
             <div><p className="eyebrow">Наше солнечное богатство</p><h2>Выберите <em>свой мёд</em></h2></div>
-            <p>Каждый медосбор — свой аромат и характер. Мы честно указываем год урожая и цены на доступную фасовку.</p>
+            <p>Каждый медосбор — свой аромат и характер. Годы урожая, фасовки и цены приведены для предварительного ознакомления и подлежат подтверждению.</p>
           </div>
           <div className="catalog-toolbar">
             <div className="year-tabs" role="group" aria-label="Фильтр по году урожая">
@@ -193,15 +187,15 @@ export default function App() {
                 <h3>{item.name}</h3>
                 <p className="product__description">{item.description}</p>
                 <div className="product__packs" aria-label={'Цены на ' + item.name}>
-                  {item.packs.map(pack => <a key={pack.size} className="pack" href={smsLink(item, pack)} aria-label={'Заказать ' + item.name + ', ' + pack.size + ', ' + price(pack.price) + ' по SMS'}>
-                    <span>{pack.size}</span><strong>{price(pack.price)}</strong><span aria-hidden="true">↗</span>
-                  </a>)}
+                  {item.packs.map(pack => <div key={pack.size} className="pack" aria-label={item.name + ', ' + pack.size + ', ' + price(pack.price)}>
+                    <span>{pack.size}</span><strong>{price(pack.price)}</strong><span aria-hidden="true">✿</span>
+                  </div>)}
                 </div>
-                <p className="product__hint">Нажмите на цену, чтобы подготовить заказ по SMS</p>
+                <p className="product__hint">Справочная стоимость. Заказ через сайт временно недоступен.</p>
               </div>
             </article>)}
           </div>
-          <p className="catalog-notice">Цены указаны по состоянию на октябрь 2026 г. Наличие и стоимость доставки уточняем при заказе. Объём тары указан в литрах; фактический вес зависит от плотности мёда.</p>
+          <p className="catalog-notice">Каталог — предварительная информация, не публичная оферта. Цены и наличие требуют подтверждения владельцем. Оформление заказов и оплата на сайте отключены. Объём тары указан в литрах; фактический вес зависит от плотности мёда.</p>
         </div>
       </section>
 
@@ -217,8 +211,8 @@ export default function App() {
             <h2>Семейная пасека <em>с душой</em></h2>
             <p className="story__large">Наш «Хуторок» находится в Самарской области, в селе Русская Селитьба. Здесь мы работаем с пчёлами и собираем мёд, который любим сами.</p>
             <p>Медосбор меняется от сезона к сезону: цветёт липа, приходит время разнотравья, а ближе к концу лета на полях раскрывается подсолнечник. В этом и ценность настоящего мёда — он не обязан быть одинаковым.</p>
-            <div className="story__note"><span>♥</span><p>Мы продаём мёд со своей пасеки и открыто рассказываем о медосборах, урожаях и фасовке.</p></div>
-            <a className="text-link" href="#order">Познакомиться и заказать <span>↗</span></a>
+            <div className="story__note"><span>♥</span><p>Мы занимаемся пчеловодством и рассказываем о медосборах, урожаях и фасовке. Публикация сайта пока тестовая.</p></div>
+            <a className="text-link" href="#order">Связаться с пасекой <span>↗</span></a>
           </div>
         </div>
       </section>
@@ -230,7 +224,7 @@ export default function App() {
             <div className="process__step"><span className="process__number">01</span><span className="process__icon">✿</span><h3>Цветут луга</h3><p>Липа, донник, полевые цветы и подсолнечник дарят пчёлам нектар.</p></div>
             <div className="process__step"><span className="process__number">02</span><span className="process__icon">♧</span><h3>Трудятся пчёлы</h3><p>Пчелиные семьи собирают нектар и превращают его в зрелый мёд.</p></div>
             <div className="process__step"><span className="process__number">03</span><span className="process__icon">⬡</span><h3>Собираем урожай</h3><p>Отбираем запечатанные медовые рамки и откачиваем мёд.</p></div>
-            <div className="process__step"><span className="process__number">04</span><span className="process__icon">♡</span><h3>Делимся с вами</h3><p>Фасуем мёд в выбранную тару и согласовываем получение заказа.</p></div>
+            <div className="process__step"><span className="process__number">04</span><span className="process__icon">♡</span><h3>Делимся с вами</h3><p>Фасуем мёд в подходящую тару и бережно храним урожай.</p></div>
           </div>
         </div>
       </section>
@@ -250,24 +244,24 @@ export default function App() {
       <section className="order" id="order">
         <div className="wrap order__grid">
           <div>
-            <p className="eyebrow">Давайте знакомиться</p>
-            <h2>Пора добавить <em>немного лета</em> в ваш дом!</h2>
-            <p>Выберите мёд и фасовку в каталоге — откроется SMS с готовым текстом заказа. Или просто позвоните нам. Никакой регистрации, корзин и сложных форм.</p>
-            <a className="button button--primary" href="#catalog">Выбрать мёд <span>↗</span></a>
+            <p className="eyebrow">Информация и контакты</p>
+            <h2>Узнайте больше <em>о нашей пасеке</em></h2>
+            <p>Познакомьтесь с медосборами и фасовкой в каталоге. В тестовой версии можно задать вопрос по телефону; оформление заказов на сайте отключено.</p>
+            <a className="button button--primary" href="#catalog">Посмотреть каталог <span>↗</span></a>
           </div>
           <div className="contact-card">
             <span className="contact-card__flower">✺</span><h3>Свяжитесь с нами</h3>
-            <p>Подскажем, что сейчас есть в наличии, поможем с выбором и обсудим получение заказа.</p>
+            <p>По телефону можно уточнить сведения о пасеке и продукции. Публикация каталога не означает приём заказов через сайт.</p>
             {phones.map(phone => <a className="contact-card__phone" href={'tel:' + phone.digits} key={phone.digits}>{phone.label}<span>↗</span></a>)}
-            <a className="contact-card__sms" href={'sms:' + phones[0].digits + '?body=' + encodeURIComponent('Здравствуйте! Хочу заказать натуральный мёд с пасеки «Хуторок». Подскажите, пожалуйста, ассортимент и доставку.')}>Написать SMS <span>↗</span></a>
-            <small>Самарская область, село Русская Селитьба. Доставку и самовывоз согласовываем индивидуально.</small>
+            <p className="contact-card__info">SMS-заказы через сайт в тестовой версии отключены.</p>
+            <small>Самарская область, село Русская Селитьба. Сведения о доставке и реализации будут уточнены до начала онлайн-продаж.</small>
           </div>
         </div>
       </section>
     </main>
     <footer className="footer">
       <div className="wrap footer__grid"><div><a className="brand" href="#top"><HoneyMark /><span className="brand__text"><span>СЕМЕЙНАЯ ПАСЕКА</span><strong>Хуторок</strong></span></a><p>Мёд, в котором живёт лето.</p></div><div><strong>Разделы</strong><a href="#catalog">Наш мёд</a><a href="#about">О пасеке</a><a href="#gallery">Галерея</a></div><div><strong>Связаться</strong><a href="tel:+79179544695">+7 917 954-46-95</a><a href="tel:+79372082330">+7 937 208-23-30</a><a href="https://pchelovod63.ru/" target="_blank" rel="noopener noreferrer">Портал «Пчеловод 63» ↗</a></div></div>
-      <div className="footer__bottom wrap"><span>© 2026 Пасека «Хуторок». Самарская область.</span><a href="#top">Наверх ↑</a></div>
+      <div className="footer__bottom wrap"><span>© 2026 Пасека «Хуторок». Тестовая версия.</span><a href={import.meta.env.BASE_URL + "privacy.html"}>Политика обработки персональных данных</a><a href="#top">Наверх ↑</a></div>
     </footer>
   </div>
 }
