@@ -261,7 +261,7 @@ export default function App() {
     </main>
     <footer className="footer">
       <div className="wrap footer__grid"><div><a className="brand" href="#top"><HoneyMark /><span className="brand__text"><span>СЕМЕЙНАЯ ПАСЕКА</span><strong>Хуторок</strong></span></a><p>Мёд, в котором живёт лето.</p></div><div><strong>Разделы</strong><a href="#catalog">Наш мёд</a><a href="#about">О пасеке</a><a href="#gallery">Галерея</a></div><div><strong>Связаться</strong><a href="tel:+79179544695">+7 917 954-46-95</a><a href="tel:+79372082330">+7 937 208-23-30</a><a href="https://pchelovod63.ru/" target="_blank" rel="noopener noreferrer">Портал «Пчеловод 63» ↗</a></div></div>
-      <div className="footer__bottom wrap"><span>© 2026 Пасека «Хуторок». Тестовая версия.</span><a href={import.meta.env.BASE_URL + "privacy.html"}>Политика обработки персональных данных</a><a href="#top">Наверх ↑</a></div>
+      <div className="footer__bottom wrap"><span>© 2026 Пасека «Хуторок». Тестовая версия.</span><a href="/hutorok-website/privacy.html">Политика обработки персональных данных</a><a href="#top">Наверх ↑</a></div>
     </footer>
   </div>
 }
