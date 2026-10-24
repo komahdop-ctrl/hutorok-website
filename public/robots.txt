@@ -1,3 +1,2 @@
 User-agent: *
-Allow: /
-Sitemap: https://komahdop-ctrl.github.io/hutorok-website/sitemap.xml
+Disallow: /
