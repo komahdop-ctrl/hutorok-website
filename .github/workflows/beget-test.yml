@@ -1,0 +1,85 @@
+name: Publish Hutorok to Beget test hosting
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: beget-hutorok-test
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install and build
+        run: |
+          npm ci
+          npm run build
+          test -s dist/index.html
+          test -s dist/privacy.html
+          grep -q '/hutorok-website/assets/' dist/index.html
+          grep -qi 'noindex' dist/index.html
+          printf '%s\n' "$GITHUB_SHA" > dist/beget-build.txt
+      - name: Publish static files to test folder
+        shell: bash
+        env:
+          BEGET_SSH_KEY: ${{ secrets.BEGET_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$BEGET_SSH_KEY" ]]; then
+            echo '::error::Add the BEGET_SSH_KEY repository secret before publishing.'
+            exit 1
+          fi
+          ssh_dir=$(mktemp -d)
+          trap 'rm -rf "$ssh_dir"' EXIT
+          chmod 700 "$ssh_dir"
+          printf '%s\n' "$BEGET_SSH_KEY" | tr -d '\r' > "$ssh_dir/key"
+          chmod 600 "$ssh_dir/key"
+          ssh-keygen -y -P '' -f "$ssh_dir/key" > /dev/null
+          ssh-keyscan -T 15 -t ed25519 vendingi.beget.tech > "$ssh_dir/scanned_hosts"
+          expected='SHA256:4+NodSyDnT38XilJxBKCva9nOl+04LnsAMKZpr0mh48'
+          actual=$(ssh-keygen -lf "$ssh_dir/scanned_hosts" | awk '{print $2}' | sort -u)
+          [[ "$actual" == "$expected" ]] || { echo '::error::Beget host fingerprint changed. Verify through Beget panel.'; exit 1; }
+          cp "$ssh_dir/scanned_hosts" "$ssh_dir/known_hosts"
+          ssh_args=(-i "$ssh_dir/key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o "UserKnownHostsFile=$ssh_dir/known_hosts" -o ConnectTimeout=20)
+          ssh "${ssh_args[@]}" vendingi@vendingi.beget.tech 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          parent=/home/v/vendingi/vendingi.beget.tech/public_html
+          test -d "$parent"
+          target="$parent/hutorok-website"
+          test ! -L "$target"
+          if test -e "$target"; then
+            test -d "$target"
+            test -f "$target/beget-build.txt" || { echo 'Existing folder is not managed by this workflow'; exit 1; }
+            mkdir -p /home/v/vendingi/hutorok-backups
+            tar -czf "/home/v/vendingi/hutorok-backups/site-$(date -u +%Y%m%dT%H%M%S).tgz" -C "$parent" hutorok-website
+          else
+            mkdir "$target"
+          fi
+          REMOTE
+          export RSYNC_RSH="ssh -i $ssh_dir/key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$ssh_dir/known_hosts -o ConnectTimeout=20"
+          rsync -rz --delay-updates --chmod=D755,F644 dist/ vendingi@vendingi.beget.tech:/home/v/vendingi/vendingi.beget.tech/public_html/hutorok-website/
+      - name: Verify published build over HTTPS
+        shell: bash
+        run: |
+          set -euo pipefail
+          url=https://vendingi.beget.tech/hutorok-website
+          actual=$(curl --fail --silent --show-error --retry 3 --max-time 30 "$url/beget-build.txt?run=$GITHUB_RUN_ID")
+          test "$actual" = "$GITHUB_SHA"
+          curl --fail --silent --show-error --max-time 30 "$url/" | grep -q '/hutorok-website/assets/'
+          curl --fail --silent --show-error --max-time 30 "$url/privacy.html" > /dev/null
+          printf 'Published commit `%s`: %s/\n' "$GITHUB_SHA" "$url" >> "$GITHUB_STEP_SUMMARY"
