@@ -6,12 +6,16 @@ const root = process.env.SITE_URL || 'http://127.0.0.1:4173/hutorok-website/'
 const browser = await chromium.launch({ headless: true })
 const jsErrors = []
 const externalRequests = []
+const imageResponses = []
 
 try {
   await mkdir('qa-output', { recursive: true })
 
   const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 })
   desktop.on('pageerror', error => jsErrors.push(error.message))
+  desktop.on('response', response => {
+    if (response.url().includes('/images/')) imageResponses.push({ url: response.url(), status: response.status() })
+  })
   desktop.on('request', request => {
     const url = request.url()
     if (url.startsWith('http') && !url.startsWith('http://127.0.0.1:4173')) externalRequests.push(url)
@@ -40,16 +44,19 @@ try {
   assert.equal(await desktop.locator('meta[name="robots"]').getAttribute('content'), 'noindex,nofollow')
   assert.match(await desktop.locator('.beta-notice').innerText(), /не принимает заказы и оплату/)
 
+  await desktop.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode().catch(() => null))))
   const imageStates = await desktop.locator('img').evaluateAll(images => images.map(image => ({
     loaded: image.complete && image.naturalWidth > 0,
     alt: image.getAttribute('alt'),
     src: image.getAttribute('src'),
   })))
+  console.log('IMAGE_STATES ' + JSON.stringify(imageStates))
+  console.log('IMAGE_RESPONSES ' + JSON.stringify(imageResponses))
+  await desktop.screenshot({ path: 'qa-output/desktop-1440.png', fullPage: true })
   assert.equal(imageStates.length, 4, 'Ожидаются четыре изображения в контенте')
   assert.ok(imageStates.every(image => image.loaded && image.alt && image.alt.trim().length > 0),
     'Все изображения должны загрузиться и иметь осмысленный alt')
   assert.deepEqual(externalRequests, [], 'Страница не должна запрашивать внешние ресурсы')
-  await desktop.screenshot({ path: 'qa-output/desktop-1440.png', fullPage: true })
 
   await desktop.getByRole('button', { name: 'Медосборы' }).click()
   assert.equal(await desktop.locator('.product-card').count(), 3, 'Фильтр медосборов должен показывать три позиции')
