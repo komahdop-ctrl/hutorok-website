@@ -15,12 +15,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
       - name: Install
-        run: npm install
+        run: npm ci
       - name: Typecheck and build
         run: npm run build
       - name: Smoke-test output
         run: |
           test -s dist/index.html
           test -s dist/bee.svg
-          grep -q 'Пасека' dist/index.html
+          test -s dist/privacy.html
+          test -s dist/images/apiary-frame.svg
+          test -s dist/images/beekeeper-apiary.svg
+          test -s dist/images/honey-buckets.svg
+          grep -q 'Настоящий мёд' dist/index.html
+          grep -q 'Цветочно-липовый' dist/index.html
+          grep -q 'noindex,nofollow' dist/index.html
+          ! grep -q 'images.unsplash.com' dist/index.html
+          ! grep -q 'sms:' dist/index.html
