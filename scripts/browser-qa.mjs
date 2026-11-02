@@ -34,7 +34,8 @@ try {
   assert.equal(await desktop.locator('input').count(), 0, 'Поля для сбора ПДн отсутствуют')
   assert.equal(await desktop.locator('a[href^="sms:"]').count(), 0, 'SMS-заказы отключены')
   assert.equal(await desktop.locator('a[href^="mailto:"]').count(), 0, 'Неподтверждённая почта не публикуется')
-  assert.equal(await desktop.locator('a[href^="tel:"]').count(), 2, 'Два добровольных телефонных контакта доступны')
+  assert.equal(await desktop.locator('.contact-card a[href^="tel:"]').count(), 2, 'Два добровольных телефонных контакта доступны')
+  assert.equal(await desktop.locator('a[href^="tel:"]').count(), 4, 'Два телефона доступны в контактах и продублированы в подвале')
   assert.equal(await desktop.locator('img[src*="unsplash"]').count(), 0, 'Внешние фотохостинги не используются')
   assert.equal(await desktop.locator('meta[name="robots"]').getAttribute('content'), 'noindex,nofollow')
   assert.match(await desktop.locator('.beta-notice').innerText(), /не принимает заказы и оплату/)
@@ -66,7 +67,7 @@ try {
   assert.match(await desktop.locator('.selection-panel').innerText(), /Цветочно-липовый/)
   assert.match(await desktop.locator('.selection-panel').innerText(), /3 л/)
   assert.equal(await desktop.locator('form').count(), 0, 'Выбор не должен создавать форму или отправку')
-  assert.equal(await desktop.locator('a[href^="tel:"]').count(), 2, 'Выбор не должен создавать автоматический звонок')
+  assert.equal(await desktop.locator('.contact-card a[href^="tel:"]').count(), 2, 'Выбор не должен создавать автоматический звонок')
   await desktop.screenshot({ path: 'qa-output/desktop-selection.png', fullPage: true })
 
   for (const width of [320, 375, 390, 768]) {
@@ -91,7 +92,7 @@ try {
     const menu = mobile.getByRole('button', { name: 'Открыть меню' })
     await menu.click()
     assert.equal(await mobile.getByRole('button', { name: 'Закрыть меню' }).getAttribute('aria-expanded'), 'true')
-    await mobile.getByRole('link', { name: 'Фотографии' }).click()
+    await mobile.locator('#main-nav').getByRole('link', { name: 'Фотографии' }).click()
     assert.equal(await mobile.getByRole('button', { name: 'Открыть меню' }).getAttribute('aria-expanded'), 'false')
 
     if (width === 390) {
