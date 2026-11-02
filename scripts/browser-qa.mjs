@@ -44,7 +44,7 @@ try {
   assert.equal(await desktop.locator('meta[name="robots"]').getAttribute('content'), 'noindex,nofollow')
   assert.match(await desktop.locator('.beta-notice').innerText(), /не принимает заказы и оплату/)
 
-  await desktop.locator('img').evaluateAll(images => Promise.all(images.map(image => image.decode().catch(() => null))))
+  await desktop.waitForTimeout(500)
   const imageStates = await desktop.locator('img').evaluateAll(images => images.map(image => ({
     loaded: image.complete && image.naturalWidth > 0,
     alt: image.getAttribute('alt'),
